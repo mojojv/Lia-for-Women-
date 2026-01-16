@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat con Lia 🌸{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-morphism {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .message-bubble-user {
+        border-radius: 18px 18px 0px 18px;
+        box-shadow: 0 4px 6px -1px rgba(167, 139, 250, 0.2);
+    }
+
+    .message-bubble-lia {
+        border-radius: 18px 18px 18px 0px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .typing-dot {
+        animation: typing 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) {
+        animation-delay: -0.32s;
+    }
+
+    .typing-dot:nth-child(2) {
+        animation-delay: -0.16s;
+    }
+
+    @keyframes typing {
+
+        0%,
+        80%,
+        100% {
+            transform: scale(0);
+        }
+
+        40% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-enter {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
+    <!-- Chat Container -->
+    <div class="glass-morphism rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden relative">
+
+        <!-- Header -->
+        <div
+            class="bg-white/80 backdrop-blur-md p-4 flex items-center justify-between border-b border-lavender-100 z-10">
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-lavender-400 to-mint-300 p-[2px]">
+                        <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
+                            <span class="text-2xl">🌸</span>
+                        </div>
+                    </div>
+                    <span
+                        class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Lia</h2>
+                    <p class="text-xs text-lavender-500 font-medium flex items-center">
+                        <span class="w-1.5 h-1.5 bg-lavender-400 rounded-full mr-1 animate-pulse"></span>
+                        Siempre aquí para ti
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button class="p-2 text-gray-400 hover:text-lavender-500 transition rounded-full hover:bg-lavender-50"
+                    title="Información">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chatMessages"
+            class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-white/50 to-lavender-50/30 scroll-smooth">
+            {% if not recent_chats %}
+            <div class="flex flex-col items-center justify-center h-full text-center p-8 space-y-4 opacity-70">
+                <div class="w-20 h-20 bg-lavender-100/50 rounded-full flex items-center justify-center mb-2">
+                    <span class="text-4xl">💜</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700">Bienvenida a tu espacio seguro</h3>
+                    <p class="text-sm text-gray-500 max-w-xs mx-auto mt-1">Este chat es privado y confidencial.
+                        Cuéntame, ¿cómo te sientes hoy?</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% for chat in recent_chats %}
+            <!-- User Message -->
+            <div class="flex justify-end message-enter">
+                <div
+                    class="message-bubble-user bg-gradient-to-br from-lavender-500 to-lavender-600 text-white px-5 py-3 max-w-[80%] shadow-md">
+                    <p class="text-[15px] leading-relaxed">{{ chat.message_text }}</p>
+                    <p class="text-[10px] text-lavender-200 mt-1 text-right">{{ chat.timestamp|time:"H:i" }}</p>
+                </div>
+            </div>
+
+            <!-- Lia Response -->
+            <div class="flex justify-start message-enter">
+                <div class="flex items-end space-x-2 max-w-[85%]">
+                    <div
+                        class="w-8 h-8 rounded-full bg-lavender-100 flex-shrink-0 flex items-center justify-center text-sm mb-1">
+                        🌸</div>
+                    <div
+                        class="message-bubble-lia bg-white text-gray-700 px-5 py-3 border border-gray-100 shadow-sm relative group">
+                        <p class="text-[15px] leading-relaxed">{{ chat.bot_response }}</p>
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-[10px] text-gray-400">Lia · {{ chat.timestamp|time:"H:i" }}</span>
+                            <!-- Actions (hidden by default, show on hover) -->
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                                <button class="text-gray-400 hover:text-lavender-500" title="Reproducir voz"
+                                    onclick="speakText('{{ chat.bot_response|escapejs }}')">🔊</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Typing Indicator (Hidden by default) -->
+            <div id="typingIndicator" class="hidden flex justify-start message-enter">
+                <div class="flex items-end space-x-2">
+                    <div
+                        class="w-8 h-8 rounded-full bg-lavender-100 flex-shrink-0 flex items-center justify-center text-sm mb-1">
+                        🌸</div>
+                    <div class="message-bubble-lia bg-white px-4 py-3 border border-gray-100 shadow-sm">
+                        <div class="flex space-x-1 h-5 items-center">
+                            <div class="w-2 h-2 bg-lavender-400 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-lavender-400 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-lavender-400 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spacer for scrolling -->
+            <div class="h-2"></div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-white/90 backdrop-blur-sm border-t border-lavender-100">
+            <form id="chatForm" class="relative">
+                {% csrf_token %}
+                <div class="relative flex items-center">
+                    <input type="text" id="messageInput" placeholder="Escribe aquí cómo te sientes..."
+                        class="w-full pl-5 pr-28 py-4 rounded-xl bg-gray-50 border-gray-200 border text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 focus:bg-white transition-all shadow-inner"
+                        autocomplete="off">
+
+                    <!-- Actions inside input -->
+                    <div class="absolute right-2 flex items-center space-x-1">
+                        <button type="button" id="voiceButton"
+                            class="p-2 text-gray-400 hover:text-mint-500 hover:bg-mint-50 rounded-lg transition-all"
+                            title="Usar voz">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button type="submit"
+                            class="bg-lavender-500 text-white p-2.5 rounded-lg hover:bg-lavender-600 shadow-lg shadow-lavender-200 hover:shadow-lavender-300 transition-all transform hover:scale-105 active:scale-95">
+                            <svg class="w-5 h-5 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-center text-[10px] text-gray-400 mt-2 flex justify-center items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
+                    </svg>
+                    Tus conversaciones están encriptadas y protegidas.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- Utilities ---
+    const chatMessages = document.getElementById('chatMessages');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    function scrollToBottom() {
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+    // Initial scroll
+    scrollToBottom();
+
+    // --- Speech Synthesis ---
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Stop current speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.1; // Slightly higher pitch for female voice suggestion
+
+            // Try to select a female voice if available
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Helena') || v.name.includes('Monica') || v.name.includes('Female')));
+            if (femaleVoice) utterance.voice = femaleVoice;
+
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    // --- Chat Logic ---
+    document.getElementById('chatForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+
+        if (!message) return;
+
+        // 1. Add User Message
+        addUserMessage(message);
+        messageInput.value = '';
+        messageInput.focus();
+
+        // 2. Show Typing Indicator
+        showTyping(true);
+        scrollToBottom();
+
+        // 3. Send to Server
+        try {
+            // Fake delay for realism (min 1 sec, varies slightly)
+            const minDelay = new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 500));
+
+            const fetchPromise = fetch('{% url "chatbot:send_message" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({ 'message': message })
+            });
+
+            const [_, response] = await Promise.all([minDelay, fetchPromise]);
+            const data = await response.json();
+
+            showTyping(false);
+
+            if (data.success) {
+                addLiaMessage(data.response);
+            } else {
+                addSystemMessage('Error: ' + (data.error || 'No pude procesar tu mensaje 😔'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showTyping(false);
+            addSystemMessage('Error de conexión. Verifica tu internet.');
+        }
+    });
+
+    // --- UI Helpers ---
+    function addUserMessage(text) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+        const div = document.createElement('div');
+        div.className = 'flex justify-end message-enter';
+        div.innerHTML = `
+            <div class="message-bubble-user bg-gradient-to-br from-lavender-500 to-lavender-600 text-white px-5 py-3 max-w-[80%] shadow-md">
+                <p class="text-[15px] leading-relaxed">${escapeHtml(text)}</p>
+                <p class="text-[10px] text-lavender-200 mt-1 text-right">${time}</p>
+            </div>
+        `;
+        chatMessages.insertBefore(div, typingIndicator); // Insert before typing indicator
+        scrollToBottom();
+    }
+
+    function addLiaMessage(text) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        const escapedText = escapeHtml(text);
+
+        const div = document.createElement('div');
+        div.className = 'flex justify-start message-enter';
+        div.innerHTML = `
+            <div class="flex items-end space-x-2 max-w-[85%]">
+                <div class="w-8 h-8 rounded-full bg-lavender-100 flex-shrink-0 flex items-center justify-center text-sm mb-1">🌸</div>
+                <div class="message-bubble-lia bg-white text-gray-700 px-5 py-3 border border-gray-100 shadow-sm relative group">
+                    <p class="text-[15px] leading-relaxed">${escapedText}</p>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-[10px] text-gray-400">Lia · ${time}</span>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                            <button class="text-gray-400 hover:text-lavender-500" title="Reproducir voz" onclick="speakText('${escapedText.replace(/'/g, "\\'")}')">🔊</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatMessages.insertBefore(div, typingIndicator);
+        scrollToBottom();
+
+        // Auto-speak (optional, subtle)
+        // speakText(text); 
+    }
+
+    function addSystemMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'flex justify-center my-4 message-enter';
+        div.innerHTML = `
+            <span class="bg-red-50 text-red-500 text-xs px-3 py-1 rounded-full border border-red-100">${escapeHtml(text)}</span>
+        `;
+        chatMessages.insertBefore(div, typingIndicator);
+        scrollToBottom();
+    }
+
+    function showTyping(show) {
+        if (show) {
+            typingIndicator.classList.remove('hidden');
+        } else {
+            typingIndicator.classList.add('hidden');
+        }
+        scrollToBottom();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // --- Voice Recognition Setup (Optimized) ---
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        const voiceButton = document.getElementById('voiceButton');
+        const messageInput = document.getElementById('messageInput');
+
+        voiceButton.addEventListener('click', function () {
+            if (voiceButton.classList.contains('text-red-500')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        recognition.onstart = function () {
+            voiceButton.classList.remove('text-gray-400');
+            voiceButton.classList.add('text-red-500', 'animate-pulse');
+            messageInput.placeholder = "Escuchando...";
+        };
+
+        recognition.onend = function () {
+            voiceButton.classList.add('text-gray-400');
+            voiceButton.classList.remove('text-red-500', 'animate-pulse');
+            messageInput.placeholder = "Escribe aquí cómo te sientes...";
+        };
+
+        recognition.onresult = function (event) {
+            const transcript = event.results[0][0].transcript;
+            messageInput.value = transcript;
+            messageInput.focus();
+        };
+    } else {
+        document.getElementById('voiceButton').style.display = 'none';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lia for a Woman{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lavender': {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                        },
+                        'mint': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                        },
+                        'peach': {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gradient-to-br from-lavender-50 to-mint-50 min-h-screen">
+    
+    <!-- Navigation Bar -->
+    {% if user.is_authenticated %}
+    <nav class="bg-white shadow-sm border-b border-lavender-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-lavender-600 to-lavender-400 bg-clip-text text-transparent">
+                        Lia 🌸
+                    </h1>
+                    <span class="ml-4 text-sm text-gray-600">
+                        {% if user.is_patient %}Espacio Personal
+                        {% elif user.is_doctor %}Panel Médico
+                        {% elif user.is_psychologist %}Panel Psicológico
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-700">
+                        Hola, <strong>{{ user.first_name|default:user.username }}</strong>
+                    </span>
+                    <a href="{% url 'users:profile' %}" class="text-lavender-600 hover:text-lavender-800 text-sm">
+                        Mi Perfil
+                    </a>
+                    <a href="{% url 'users:logout' %}" class="text-sm text-gray-600 hover:text-gray-800">
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700
+                    {% elif message.tags == 'warning' %}bg-yellow-100 border-yellow-400 text-yellow-700
+                    {% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700
+                    {% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} 
+                    border-l-4 p-4 mb-4 rounded" role="alert">
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <p class="text-center text-sm text-gray-500">
+                Lia for a Woman 💜 Sistema de apoyo psico-clínico. No reemplaza el diagnóstico médico profesional.
+            </p>
+            <p class="text-center text-xs text-gray-400 mt-2">
+                <a href="/docs/ethics.md" class="hover:text-lavender-600">Ética</a> · 
+                <a href="/docs/data_privacy.md" class="hover:text-lavender-600">Privacidad</a> · 
+                <a href="/docs/architecture.md" class="hover:text-lavender-600">Arquitectura</a>
+            </p>
+        </div>
+    </footer>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

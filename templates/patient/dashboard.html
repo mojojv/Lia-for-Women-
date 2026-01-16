@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Dashboard - Lia{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Wellness Indicator -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">¿Cómo estás hoy?</h2>
+        <div class="flex items-center space-x-4">
+            <div class="w-24 h-24 rounded-full flex items-center justify-center
+                {% if wellness_status == 'GREEN' %}bg-green-100
+                {% elif wellness_status == 'YELLOW' %}bg-yellow-100
+                {% else %}bg-red-100{% endif %}">
+                <div class="w-16 h-16 rounded-full
+                    {% if wellness_status == 'GREEN' %}bg-green-500
+                    {% elif wellness_status == 'YELLOW' %}bg-yellow-500
+                    {% else %}bg-red-500{% endif %}">
+                </div>
+            </div>
+            <div>
+                <p class="text-xl font-semibold text-gray-700">
+                    {% if wellness_status == 'GREEN' %}
+                    ¡Todo bien! 😊
+                    {% elif wellness_status == 'YELLOW' %}
+                    Necesitas atención 🤔
+                    {% else %}
+                    Contacta a tu equipo 💜
+                    {% endif %}
+                </p>
+                <p class="text-sm text-gray-500 mt-1">Indicador de bienestar general</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="{% url 'chatbot:interface' %}"
+            class="bg-gradient-to-br from-lavender-500 to-lavender-400 text-white rounded-xl p-6 hover:from-lavender-600 hover:to-lavender-500 transition transform hover:scale-105 shadow-lg">
+            <div class="text-4xl mb-2">💬</div>
+            <h3 class="text-xl font-bold">Hablar con Lia</h3>
+            <p class="text-lavender-100 text-sm mt-1">Estoy aquí para escucharte</p>
+        </a>
+
+        <a href="{% url 'clinical:report_symptom' %}"
+            class="bg-gradient-to-br from-mint-400 to-mint-300 text-gray-800 rounded-xl p-6 hover:from-mint-500 hover:to-mint-400 transition transform hover:scale-105 shadow-lg">
+            <div class="text-4xl mb-2">🩺</div>
+            <h3 class="text-xl font-bold">Registrar Síntomas</h3>
+            <p class="text-mint-800 text-sm mt-1">Cuéntame cómo te sientes</p>
+        </a>
+
+        <a href="{% url 'psychosocial:emotion_checkin' %}"
+            class="bg-gradient-to-br from-peach-400 to-peach-300 text-gray-800 rounded-xl p-6 hover:from-peach-500 hover:to-peach-400 transition transform hover:scale-105 shadow-lg">
+            <div class="text-4xl mb-2">💭</div>
+            <h3 class="text-xl font-bold">Check-in Emocional</h3>
+            <p class="text-peach-800 text-sm mt-1">
+                {% if checkin_completed %}✓ Completado hoy
+                {% else %}Comparte cómo te sientes{% endif %}
+            </p>
+        </a>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Recent Recommendations -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Recomendaciones para ti 💜</h3>
+            {% if active_recommendations %}
+            <div class="space-y-3">
+                {% for rec in active_recommendations %}
+                <div class="border-l-4 border-lavender-400 pl-4 py-2">
+                    <p class="text-sm text-gray-700">{{ rec.recommendation_text }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ rec.get_category_display }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'psychosocial:my_recommendations' %}"
+                class="text-lavender-600 hover:text-lavender-800 text-sm font-medium mt-4 inline-block">
+                Ver todas →
+            </a>
+            {% else %}
+            <p class="text-gray-500 text-sm">No hay recomendaciones nuevas</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Conversations -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Conversaciones recientes 💬</h3>
+            {% if recent_chats %}
+            <div class="space-y-3">
+                {% for chat in recent_chats %}
+                <div class="text-sm">
+                    <p class="text-gray-700 font-medium">Tú: {{ chat.message_text|truncatewords:8 }}</p>
+                    <p class="text-gray-500 mt-1">Lia: {{ chat.bot_response|truncatewords:8 }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ chat.timestamp|timesince }} atrás</p>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'chatbot:history' %}"
+                class="text-lavender-600 hover:text-lavender-800 text-sm font-medium mt-4 inline-block">
+                Ver historial →
+            </a>
+            {% else %}
+            <p class="text-gray-500 text-sm">Aún no has hablado con Lia</p>
+            <a href="{% url 'chatbot:interface' %}"
+                class="text-lavender-600 hover:text-lavender-800 text-sm font-medium mt-2 inline-block">
+                Iniciar conversación →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
